@@ -101,9 +101,24 @@ def related(lesson, lessons):
     return scored
 
 
+FOOTER = """
+<footer class="meta" style="border-top:1px solid rgba(127,127,127,.3);margin-top:3rem;padding-top:1rem">
+<span id="home-link"></span>Powered by <a href="https://github.com/svandragt/lessons-ai">lessons</a>.
+<script>
+var p = location.hostname.split(".");
+if (p.length > 2) {
+  var d = p.slice(1).join(".");
+  document.getElementById("home-link").innerHTML =
+    'Part of <a href="https://' + d + '">' + d + "</a> · ";
+}
+</script>
+</footer>
+"""
+
+
 def page(title, body):
     return (f'<!doctype html><meta charset="utf-8">'
-            f"<title>{title}</title>{STYLE}{body}").encode()
+            f"<title>{title}</title>{STYLE}{body}{FOOTER}").encode()
 
 
 def hrefs(static):
