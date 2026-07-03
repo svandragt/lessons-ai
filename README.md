@@ -3,9 +3,10 @@
 Tools around my TIL lesson notes in `~/Documents/lessons/`.
 
 Lessons are markdown files named `NNN-slug.md` with YAML frontmatter
-(`concept`, `created`, `project`, `tags`). They are created by the
-Claude Code `lessons` skill (in `skill/SKILL.md`) whenever I type
-`til <topic>` or ask about something new.
+(`concept`, `created`, `project`, `tags`, `published`). They are
+created by the Claude Code `lessons` skill (in `skill/SKILL.md`)
+whenever I type `til <topic>` or ask about something new. The skill
+scrubs personal/system information, since lessons may be published.
 
 ## Server
 
@@ -25,6 +26,23 @@ Features:
 
 Lessons are re-read on every request, so new lessons show up without a
 restart. Set `LESSONS_DIR` to point at a different lessons directory.
+
+## Publishing
+
+Lessons start as drafts. The server shows a draft badge and an
+**Approve & publish** button on each draft; clicking it sets
+`published: true` in the frontmatter and deploys.
+
+```bash
+uv run server.py build ./site   # render published lessons to static HTML
+uv run server.py deploy         # build + rsync to $LESSONS_RSYNC_DEST
+```
+
+`LESSONS_RSYNC_DEST` is an rsync target like
+`user@example.com:/var/www/lessons/`. Set it locally (e.g. in the
+gitignored `devbox.json`); when set, publishing from the browser
+auto-deploys. A `Makefile` wraps the common commands: `make run`,
+`make build`, `make deploy`.
 
 ## Layout
 
