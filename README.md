@@ -46,6 +46,22 @@ gitignored `devbox.json`); when set, publishing from the browser
 auto-deploys. A `Makefile` wraps the common commands: `make run`,
 `make build`, `make deploy`.
 
+## Installing the skill
+
+The `lessons` skill teaches Claude Code to capture new concepts as
+lesson files. Claude Code discovers skills in `~/.claude/skills/`, so
+symlink the skill directory there:
+
+```bash
+mkdir -p ~/.claude/skills
+ln -s /path/to/this/repo/skill ~/.claude/skills/lessons
+```
+
+Restart Claude Code (or start a new session) and it will offer to save
+a lesson whenever you ask about something new, or when you say things
+like "TIL ..." or "explain X". Because it's a symlink, editing
+`skill/SKILL.md` in this repo updates the live skill.
+
 ## Layout
 
 - `server.py` — the web server (uv inline dependencies, no venv needed)
