@@ -23,6 +23,8 @@ Features:
 - Markdown rendering (tables, fenced code)
 - Related lessons on each page, ranked by shared tags
 - Tag pages (`/tag/django`) and full-text search (`/search?q=...`)
+- Footer with a repo credit and, when served from a subdomain, a link
+  to the parent domain (derived client-side from the hostname)
 
 Lessons are re-read on every request, so new lessons show up without a
 restart. Set `LESSONS_DIR` to point at a different lessons directory.
