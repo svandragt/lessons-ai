@@ -102,7 +102,8 @@ def related(lesson, lessons):
 
 
 def page(title, body):
-    return f"<!doctype html><title>{title}</title>{STYLE}{body}".encode()
+    return (f'<!doctype html><meta charset="utf-8">'
+            f"<title>{title}</title>{STYLE}{body}").encode()
 
 
 def hrefs(static):
