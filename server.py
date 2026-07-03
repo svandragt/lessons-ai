@@ -183,7 +183,8 @@ def deploy():
     tmp = tempfile.mkdtemp(prefix="lessons-site-")
     try:
         n = build(tmp)
-        subprocess.run(["rsync", "-az", "--delete", f"{tmp}/", dest], check=True)
+        subprocess.run(["rsync", "-az", "--delete", "--chmod=D755,F644",
+                        f"{tmp}/", dest], check=True)
         return f"deployed {n} lessons to {dest}"
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
