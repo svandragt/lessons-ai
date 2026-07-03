@@ -80,7 +80,9 @@ Format each as a numbered item with a one-line goal and a "Done when:" check.}}
 6. **Tailor to the user's apparent level.** If they wrote senior-level code elsewhere in the session, do not over-explain basics; if they said "first time," start from zero.
 7. **No fabricated links.** Better to give one solid link than three plausible-looking guesses.
 8. **Exercises are optional ceiling, not floor.** Zero exercises is fine if the concept is purely conceptual; never exceed three.
-9. **Announce, do not interrupt.** After saving, mention the file path in one line and continue with the user's original task.
+9. **No personal or system information.** Lessons may be published publicly. Before writing, scrub anything identifying: real usernames, email addresses, hostnames, IP addresses, absolute paths containing a username (use `~/...`), client or employer names, secrets/tokens, and internal URLs. Replace any such detail with generic example data (`user@example.com`, `example-project`, `/home/user/...`). Personal project names and generic code snippets are fine.
+10. **Lessons start as drafts.** Do not add a `published:` key when creating a lesson — the user reviews and approves each lesson in the browser (via the lessons server's "Approve & publish" button) before it goes live.
+11. **Announce, do not interrupt.** After saving, mention the file path in one line and continue with the user's original task.
 
 ## Other commands
 

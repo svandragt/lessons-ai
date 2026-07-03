@@ -12,5 +12,11 @@ notes, plus the Claude Code lessons skill (`skill/SKILL.md`).
   `~/.claude/skills/lessons` points at. Editing it here updates the
   live skill — keep frontmatter valid.
 - Lesson frontmatter keys the server relies on: `concept`, `created`,
-  `project`, `tags`. Update `load_lessons()` if the skill's format
-  changes.
+  `project`, `tags`, `published`. Update `load_lessons()` if the
+  skill's format changes.
+- Lessons are drafts until `published: true`. The server's
+  "Approve & publish" button sets it; `server.py build [outdir]`
+  renders published lessons to static HTML; `server.py deploy`
+  builds and rsyncs to `$LESSONS_RSYNC_DEST` (set locally, never
+  committed). Publishing from the browser auto-deploys when the
+  env var is set.
