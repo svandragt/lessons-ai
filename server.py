@@ -44,7 +44,132 @@ table { border-collapse: collapse; } td, th { border: 1px solid rgba(127,127,127
 li.lesson { margin: .4em 0; }
 form.publish { display: inline; }
 form.publish button { background: #16a34a; color: white; border: 0; border-radius: 6px; padding: .3em .9em; cursor: pointer; }
+#note-btn { position: absolute; display: none; background: #ffe066; color: #1a1a1a; border: 0;
+  border-radius: 6px; padding: .3em .8em; font-size: .85em; font-weight: 600; cursor: pointer; z-index: 10; }
+.notes { border-top: 1px solid rgba(127,127,127,.3); margin-top: 2rem; padding-top: 1rem; }
+.note-item { background: #fef3c1; color: #1a1a1a; border-radius: 6px; padding: .6em .8em; margin: .5em 0; }
+.note-item blockquote { margin: 0 0 .4em; padding-left: .6em; border-left: 3px solid rgba(127,127,127,.4);
+  color: #6b5b00; font-size: .9em; }
+.note-item button { float: right; background: none; border: 0; color: #b45309; cursor: pointer; margin-left: .6em; }
+mark.noted { background: #ffe066; color: #1a1a1a; border-radius: 3px; cursor: pointer; padding: 0 .05em; }
 </style>
+"""
+
+NOTES_SCRIPT = """
+<script>
+(function() {
+  var key = "lesson-notes:%s";
+  var notes = JSON.parse(localStorage.getItem(key) || "[]");
+  var list = document.getElementById("notes-list");
+
+  var lessonBody = document.getElementById("lesson-body");
+  var noteBtn = document.getElementById("note-btn");
+
+  function render() {
+    list.innerHTML = notes.length ? "" : '<p class="meta">No notes yet — select some text to add one.</p>';
+    notes.forEach(function(n, i) {
+      var div = document.createElement("div");
+      div.className = "note-item";
+      var btn = document.createElement("button");
+      btn.textContent = "Remove";
+      btn.onclick = function() { notes.splice(i, 1); save(); render(); };
+      var jump = document.createElement("button");
+      jump.textContent = "Jump to text";
+      jump.onclick = function() {
+        var mark = document.getElementById("note-mark-" + i);
+        if (mark) mark.scrollIntoView({behavior: "smooth", block: "center"});
+      };
+      var quote = document.createElement("blockquote");
+      quote.textContent = n.text;
+      var body = document.createElement("div");
+      body.textContent = n.note;
+      div.appendChild(btn);
+      div.appendChild(jump);
+      div.appendChild(quote);
+      div.appendChild(body);
+      list.appendChild(div);
+    });
+    highlightAll();
+  }
+
+  function save() { localStorage.setItem(key, JSON.stringify(notes)); }
+
+  function unwrapMarks() {
+    var marks = lessonBody.querySelectorAll("mark.noted");
+    for (var i = 0; i < marks.length; i++) {
+      var m = marks[i], parent = m.parentNode;
+      while (m.firstChild) parent.insertBefore(m.firstChild, m);
+      parent.removeChild(m);
+      parent.normalize();
+    }
+  }
+
+  function locate(nodes, offset) {
+    for (var j = 0; j < nodes.length; j++) {
+      var len = nodes[j].node.nodeValue.length;
+      if (offset <= nodes[j].start + len) return {node: nodes[j].node, offset: offset - nodes[j].start};
+    }
+    return null;
+  }
+
+  function highlightAll() {
+    unwrapMarks();
+    notes.forEach(function(n, i) {
+      var walker = document.createTreeWalker(lessonBody, NodeFilter.SHOW_TEXT);
+      var nodes = [], text = "", node;
+      while (node = walker.nextNode()) {
+        nodes.push({node: node, start: text.length});
+        text += node.nodeValue;
+      }
+      var idx = text.indexOf(n.text);
+      if (idx === -1) return;
+      var start = locate(nodes, idx), end = locate(nodes, idx + n.text.length);
+      if (!start || !end) return;
+      var range = document.createRange();
+      range.setStart(start.node, start.offset);
+      range.setEnd(end.node, end.offset);
+      var mark = document.createElement("mark");
+      mark.className = "noted";
+      mark.id = "note-mark-" + i;
+      mark.title = n.note;
+      mark.onclick = function() { editNote(i); };
+      try { range.surroundContents(mark); } catch (e) {}
+    });
+  }
+
+  function editNote(i) {
+    var val = prompt("Edit note (blank to remove):", notes[i].note);
+    if (val === null) return;
+    if (val.trim()) { notes[i].note = val; } else { notes.splice(i, 1); }
+    save();
+    render();
+  }
+
+  document.addEventListener("mouseup", function(e) {
+    var sel = window.getSelection();
+    var text = sel.toString().trim();
+    if (!text || !lessonBody.contains(sel.anchorNode)) {
+      noteBtn.style.display = "none";
+      return;
+    }
+    var range = sel.getRangeAt(0).getBoundingClientRect();
+    noteBtn.style.left = (window.scrollX + range.left) + "px";
+    noteBtn.style.top = (window.scrollY + range.bottom + 6) + "px";
+    noteBtn.style.display = "block";
+    noteBtn.onclick = function() {
+      var note = prompt("Note for: \\u201c" + text.slice(0, 80) + "\\u201d");
+      noteBtn.style.display = "none";
+      if (note) {
+        notes.push({text: text, note: note});
+        save();
+        render();
+      }
+    };
+  });
+
+  render();
+})();
+</script>
 """
 
 
@@ -172,7 +297,10 @@ def lesson_html(lesson, lessons, static=False):
     head = (f'<p><a href="{home}">← all lessons</a></p>'
             f'<p class="meta">{lesson["project"]} · {lesson["created"]} · '
             f'{tags_html(lesson["tags"], static)}{status}</p>')
-    return page(lesson["title"], head + html + rel_html)
+    notes_html = ('<button id="note-btn">+ Note</button>'
+                  '<div class="notes"><h2>My notes</h2><div id="notes-list"></div></div>'
+                  + NOTES_SCRIPT % lesson["slug"])
+    return page(lesson["title"], head + f'<div id="lesson-body">{html}</div>' + rel_html + notes_html)
 
 
 def build(outdir):
