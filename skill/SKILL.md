@@ -77,6 +77,7 @@ Format each as a numbered item with a one-line goal and a "Done when:" check.}}
 3. **Number sequentially across the whole directory.** Scan existing files in `~/Documents/lessons/`, take the max `NNN`, add one. Pad to three digits.
 4. **One concept per lesson.** If the user is learning two related things, write two lessons rather than one mega-file.
 5. **Keep it short.** A lesson should be readable in 2 minutes. Long lessons do not get revisited.
+   **Plain language throughout.** Short sentences, active voice, everyday words — not just in "The idea". Define any jargon the moment it appears.
 6. **Tailor to the user's apparent level.** If they wrote senior-level code elsewhere in the session, do not over-explain basics; if they said "first time," start from zero.
 7. **No fabricated links.** Better to give one solid link than three plausible-looking guesses.
 8. **Exercises are optional ceiling, not floor.** Zero exercises is fine if the concept is purely conceptual; never exceed three.
