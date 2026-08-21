@@ -327,8 +327,14 @@ def deploy():
     tmp = tempfile.mkdtemp(prefix="lessons-site-")
     try:
         n = build(tmp)
-        subprocess.run(["rsync", "-az", "--delete", "--chmod=D755,F644",
-                        f"{tmp}/", dest], check=True)
+        # -rltz not -a: the dest root is owned by another user, so preserving
+        # perms/owner/group/dir-times on it fails with EPERM. --chmod=F644 still
+        # forces readable files; new dirs take the remote umask.
+        r = subprocess.run(["rsync", "-rltz", "--omit-dir-times", "--delete",
+                            "--chmod=F644", f"{tmp}/", dest],
+                           capture_output=True, text=True)
+        if r.returncode:
+            return f"deploy failed (rsync {r.returncode}): {r.stderr.strip()}"
         return f"deployed {n} lessons to {dest}"
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
