@@ -44,6 +44,8 @@ table { border-collapse: collapse; } td, th { border: 1px solid rgba(127,127,127
 li.lesson { margin: .4em 0; }
 form.publish { display: inline; }
 form.publish button { background: #16a34a; color: white; border: 0; border-radius: 6px; padding: .3em .9em; cursor: pointer; }
+form.discard { display: inline; }
+form.discard button { background: #dc2626; color: white; border: 0; border-radius: 6px; padding: .3em .9em; cursor: pointer; }
 #note-btn { position: absolute; display: none; background: #ffe066; color: #1a1a1a; border: 0;
   border-radius: 6px; padding: .3em .8em; font-size: .85em; font-weight: 600; cursor: pointer; z-index: 10; }
 .notes { border-top: 1px solid rgba(127,127,127,.3); margin-top: 2rem; padding-top: 1rem; }
@@ -293,7 +295,10 @@ def lesson_html(lesson, lessons, static=False):
         else:
             status = (' · <span class="draft">draft</span> '
                       f'<form class="publish" method="post" action="/publish/{lesson["slug"]}">'
-                      '<button>Approve &amp; publish</button></form>')
+                      '<button>Approve &amp; publish</button></form> '
+                      f'<form class="discard" method="post" action="/discard/{lesson["slug"]}" '
+                      'onsubmit="return confirm(\'Discard this lesson? This deletes the file.\')">'
+                      '<button>Discard</button></form>')
     head = (f'<p><a href="{home}">← all lessons</a></p>'
             f'<p class="meta">{lesson["project"]} · {lesson["created"]} · '
             f'{tags_html(lesson["tags"], static)}{status}</p>')
@@ -370,6 +375,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = unquote(urlsplit(self.path).path.rstrip("/"))
+        if path.startswith("/discard/"):
+            slug = path[len("/discard/"):]
+            lesson = next((l for l in load_lessons() if l["slug"] == slug), None)
+            if not lesson:
+                self.send_error(404)
+                return
+            lesson["path"].unlink()
+            print(f"discarded {slug}")
+            self.send_response(303)
+            self.send_header("Location", "/")
+            self.end_headers()
+            return
         if not path.startswith("/publish/"):
             self.send_error(404)
             return
